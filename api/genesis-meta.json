@@ -1,0 +1,118 @@
+{
+  "genesis_map": {
+    "kernel": {
+      "name": "Z-GENESIS-OS",
+      "components": [
+        "core",
+        "scheduler",
+        "vm",
+        "fs",
+        "io",
+        "sys"
+      ]
+    },
+    "subsystems": {
+      "core": {
+        "description": "Inizializzazione, ciclo di vita, heartbeat.",
+        "functions": ["init", "shutdown", "ping", "version"]
+      },
+      "scheduler": {
+        "description": "Gestione processi, job, stati.",
+        "functions": ["spawn", "kill", "status", "list"]
+      },
+      "vm": {
+        "description": "Esecuzione Z-LANG e bytecode.",
+        "functions": ["load", "run", "eval", "abort"]
+      },
+      "fs": {
+        "description": "Filesystem virtuale Z-FS.",
+        "functions": ["read", "write", "exists", "list", "delete"]
+      },
+      "io": {
+        "description": "Console, log, stream.",
+        "functions": ["log", "console_write", "console_read"]
+      },
+      "sys": {
+        "description": "Informazioni di sistema e capability.",
+        "functions": ["info", "capabilities", "time"]
+      }
+    },
+    "relations": {
+      "kernel -> scheduler": "Il kernel crea e gestisce processi tramite il scheduler.",
+      "kernel -> vm": "Il kernel inizializza la VM e la usa per eseguire codice.",
+      "kernel -> fs": "Il kernel monta e gestisce il filesystem virtuale.",
+      "vm -> fs": "La VM accede al FS per caricare programmi.",
+      "scheduler -> vm": "I processi possono eseguire codice tramite la VM."
+    }
+  },
+
+  "genesis_bootflow": [
+    {
+      "step": 1,
+      "name": "power_on",
+      "description": "Avvio del sistema, inizializzazione minima."
+    },
+    {
+      "step": 2,
+      "name": "kernel_init",
+      "description": "Caricamento del core GENESIS, setup memoria e contesto."
+    },
+    {
+      "step": 3,
+      "name": "mount_fs",
+      "description": "Inizializzazione e montaggio del filesystem Z-FS."
+    },
+    {
+      "step": 4,
+      "name": "vm_init",
+      "description": "Avvio della Virtual Machine Z-LANG."
+    },
+    {
+      "step": 5,
+      "name": "scheduler_init",
+      "description": "Setup del job system e tabella processi."
+    },
+    {
+      "step": 6,
+      "name": "load_boot_modules",
+      "description": "Caricamento dei moduli primordiali del kernel."
+    },
+    {
+      "step": 7,
+      "name": "start_init_process",
+      "description": "Avvio del processo iniziale (PID 1)."
+    },
+    {
+      "step": 8,
+      "name": "system_ready",
+      "description": "Il kernel GENESIS è operativo."
+    }
+  ],
+
+  "genesis_modules": {
+    "core": {
+      "description": "Cuore del kernel, gestisce init, shutdown, heartbeat.",
+      "priority": "critical"
+    },
+    "scheduler": {
+      "description": "Gestione processi, stati, job e PID.",
+      "priority": "critical"
+    },
+    "vm": {
+      "description": "Virtual Machine per esecuzione Z-LANG e bytecode.",
+      "priority": "critical"
+    },
+    "fs": {
+      "description": "Filesystem virtuale Z-FS, accesso a risorse e script.",
+      "priority": "high"
+    },
+    "io": {
+      "description": "Console, log, stream, output/input astratto.",
+      "priority": "high"
+    },
+    "sys": {
+      "description": "Informazioni di sistema, capability, uptime.",
+      "priority": "medium"
+    }
+  }
+}
