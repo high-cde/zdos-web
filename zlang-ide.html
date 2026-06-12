@@ -1,204 +1,121 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Z‑LANG IDE PRO</title>
+<title>ZDOS IDE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-  body { background:#000; color:#0f0; font-family:monospace; margin:0; padding:0; }
-  #container { display:flex; height:100vh; }
-  #editor { width:50%; padding:10px; background:#111; color:#0f0; font-size:14px; outline:none; border:none; }
-  #right { width:50%; display:flex; flex-direction:column; }
-  #output { flex:1; background:#000; padding:10px; overflow:auto; border-left:2px solid #0f0; }
-  #buttons { padding:10px; background:#111; border-left:2px solid #0f0; }
-  button { background:#000; color:#0f0; border:1px solid #0f0; padding:5px 10px; margin-right:5px; cursor:pointer; }
-  button:hover { background:#0f0; color:#000; }
-  #term-input { width:100%; background:#000; color:#0f0; border:1px solid #0f0; padding:5px; font-family:monospace; }
-  .op { color:#0ff; }
+  body {
+    margin:0;
+    background:#0a0a0c;
+    color:#e5e7eb;
+    font-family:system-ui, sans-serif;
+    display:flex;
+    height:100vh;
+    overflow:hidden;
+  }
+
+  #sidebar {
+    width:230px;
+    background:#0f1117;
+    border-right:1px solid #1f2937;
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+  }
+
+  #logo {
+    font-size:15px;
+    font-weight:700;
+    color:#2bffb3;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+
+  .section-title {
+    font-size:11px;
+    color:#7df9ff;
+    margin-bottom:6px;
+  }
+
+  .nav-item {
+    font-size:13px;
+    padding:5px 0;
+    cursor:pointer;
+    color:#9ca3af;
+  }
+  .nav-item:hover {
+    color:#2bffb3;
+  }
+
+  #main {
+    flex:1;
+    display:flex;
+    flex-direction:column;
+  }
+
+  #editor {
+    flex:1;
+    background:#0b0d14;
+    border-bottom:1px solid #1f2937;
+    padding:20px;
+    font-family:monospace;
+    font-size:14px;
+    color:#e5e7eb;
+    outline:none;
+    overflow:auto;
+  }
+
+  #terminal {
+    height:180px;
+    background:#000;
+    color:#2bffb3;
+    padding:12px;
+    font-family:monospace;
+    font-size:13px;
+    overflow:auto;
+    border-top:1px solid #1f2937;
+  }
 </style>
 </head>
 
 <body>
-<div id="container">
-  <textarea id="editor"># Esempio Z-LANG
-push 5
-push 7
-add
-halt</textarea>
 
-  <div id="right">
-    <div id="buttons">
-      <button onclick="runProgram()">Run VM</button>
-      <button onclick="stepProgram()">Step</button>
-      <button onclick="runZLang()">Run Z‑LANG</button>
-      <button onclick="runZVM()">Run Z‑VM</button>
-      <button onclick="compileAndRunZVM()">Compile & Run Z‑VM</button>
-    </div>
+<div id="sidebar">
+  <div id="logo">ZDOS IDE</div>
 
-    <div id="output"></div>
+  <div>
+    <div class="section-title">GENESIS</div>
+    <div class="nav-item">Bootflow</div>
+    <div class="nav-item">Modules</div>
+    <div class="nav-item">Kernel Map</div>
+  </div>
 
-    <input id="term-input" placeholder="ZDOS> comando" onkeydown="if(event.key==='Enter') handleTermCommand(this.value)">
+  <div>
+    <div class="section-title">TOOLS</div>
+    <div class="nav-item">Z‑LANG</div>
+    <div class="nav-item">Z‑VM</div>
+    <div class="nav-item">FS Viewer</div>
+  </div>
+
+  <div>
+    <div class="section-title">SYSTEM</div>
+    <div class="nav-item">Settings</div>
+    <div class="nav-item">About</div>
   </div>
 </div>
 
-<script>
-const editorEl = document.getElementById("editor");
-const outEl = document.getElementById("output");
+<div id="main">
+  <div id="editor" contenteditable="true">
+// ZDOS IDE — Template originale.
+// Scrivi codice Z‑LANG qui.
+  </div>
 
-function log(msg) {
-  outEl.innerHTML += msg + "<br>";
-  outEl.scrollTop = outEl.scrollHeight;
-}
+  <div id="terminal">
+[ZDOS] Terminale pronto.
+  </div>
+</div>
 
-function highlight(code) {
-  code = code.replace(/\brun\.zlang\b/g, '<span class="op">run.zlang</span>');
-  return code;
-}
-
-/* ============================================================
-   MINI‑VM ORIGINALE (per compatibilità)
-   ============================================================ */
-const VM = {
-  pc: 0,
-  program: [],
-  vars: {},
-  fs: {},
-  lastResult: null
-};
-
-function parseProgram() {
-  VM.program = [];
-  const lines = editorEl.value.split("\n");
-  for (let line of lines) {
-    line = line.trim();
-    if (!line) continue;
-    const parts = line.split(" ");
-    VM.program.push({ op: parts[0], raw: line });
-  }
-}
-
-function stepProgram() {
-  if (VM.pc >= VM.program.length) {
-    log("[VM] Fine programma.");
-    return;
-  }
-
-  const instr = VM.program[VM.pc++];
-  switch(instr.op) {
-
-    case "run.zlang": {
-      const code = instr.raw.replace("run.zlang ", "");
-      log("[run.zlang] >>> " + code);
-      VM.lastResult = "OK";
-      break;
-    }
-
-    default:
-      log("[VM] Istruzione sconosciuta: " + instr.op);
-  }
-}
-
-function runProgram() {
-  outEl.innerHTML = "";
-  VM.pc = 0;
-  parseProgram();
-  while (VM.pc < VM.program.length) stepProgram();
-}
-
-/* ============================================================
-   Z‑VM STACK MACHINE
-   ============================================================ */
-const ZVM = {
-  pc: 0,
-  stack: [],
-  heap: {},
-  regs: { r0:0, r1:0, r2:0, r3:0 },
-  bytecode: [],
-  halted: false
-};
-
-function zvmStep() {
-  if (ZVM.halted || ZVM.pc >= ZVM.bytecode.length) return;
-
-  const op = ZVM.bytecode[ZVM.pc++];
-
-  switch(op) {
-    case 0x01: ZVM.stack.push(ZVM.bytecode[ZVM.pc++]); break;
-    case 0x02: ZVM.stack.pop(); break;
-    case 0x03: { const b=ZVM.stack.pop(), a=ZVM.stack.pop(); ZVM.stack.push(a+b); break; }
-    case 0x04: { const b=ZVM.stack.pop(), a=ZVM.stack.pop(); ZVM.stack.push(a-b); break; }
-    case 0x05: { const b=ZVM.stack.pop(), a=ZVM.stack.pop(); ZVM.stack.push(a*b); break; }
-    case 0x06: { const b=ZVM.stack.pop(), a=ZVM.stack.pop(); ZVM.stack.push(a/b); break; }
-    case 0x07: { const r="r"+ZVM.bytecode[ZVM.pc++]; ZVM.stack.push(ZVM.regs[r]); break; }
-    case 0x08: { const r="r"+ZVM.bytecode[ZVM.pc++]; ZVM.regs[r]=ZVM.stack.pop(); break; }
-    case 0x09: ZVM.halted = true; break;
-  }
-}
-
-function runZVM() {
-  outEl.innerHTML = "";
-  log("[ZVM] Avvio stack machine…");
-
-  ZVM.pc = 0;
-  ZVM.stack = [];
-  ZVM.regs = { r0:0, r1:0, r2:0, r3:0 };
-  ZVM.halted = false;
-
-  while (!ZVM.halted && ZVM.pc < ZVM.bytecode.length) {
-    zvmStep();
-  }
-
-  log("[ZVM] Completato. Stack: " + JSON.stringify(ZVM.stack));
-}
-
-/* ============================================================
-   COMPILATORE Z‑LANG → Z‑VM
-   ============================================================ */
-function compileZLangToZVM(code) {
-  const lines = code.split("\n");
-  const bc = [];
-
-  for (let line of lines) {
-    line = line.trim();
-    if (!line || line.startsWith("#")) continue;
-
-    if (line.startsWith("push ")) {
-      bc.push(0x01, Number(line.split(" ")[1]));
-    } else if (line === "add") bc.push(0x03);
-    else if (line === "sub") bc.push(0x04);
-    else if (line === "mul") bc.push(0x05);
-    else if (line === "div") bc.push(0x06);
-    else if (line === "halt") bc.push(0x09);
-  }
-
-  return bc;
-}
-
-function compileAndRunZVM() {
-  outEl.innerHTML = "";
-  log("[ZVM] Compilazione…");
-  ZVM.bytecode = compileZLangToZVM(editorEl.value);
-  log("[ZVM] Bytecode: " + JSON.stringify(ZVM.bytecode));
-  runZVM();
-}
-
-/* ============================================================
-   TERMINALE ZDOS
-   ============================================================ */
-function handleTermCommand(cmd) {
-  cmd = cmd.trim();
-  if (!cmd) return;
-  log("ZDOS> " + cmd);
-
-  if (cmd === "run zvm") runZVM();
-  else if (cmd === "compile zvm") compileAndRunZVM();
-  else if (cmd === "vars") log("[vars] " + JSON.stringify(VM.vars));
-  else if (cmd === "fs") log("[fs] " + JSON.stringify(VM.fs));
-  else log("[errore] Comando sconosciuto.");
-}
-</script>
-<script src="genesis-v5.js"></script>
-<script>GENESIS_V5_BOOT();</script>
-<script src="genesis-v5.js"></script>
-<script>GENESIS_V5_BOOT();</script>
 </body>
 </html>
