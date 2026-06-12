@@ -1,505 +1,505 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <title>ZDOS Ecosystem – Cyber OS Modulare</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root {
-      --bg: #050608;
-      --bg-alt: #0b0d12;
-      --fg: #e5f5ff;
-      --accent: #00ff9c;
-      --accent-soft: rgba(0, 255, 156, 0.12);
-      --muted: #7f8b9e;
-      --danger: #ff4b81;
-      --mono: "Fira Code", "JetBrains Mono", monospace;
-      --sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-    }
+ <meta charset="UTF-8" />
+ <title>ZDOS Ecosystem – Cyber OS Modulare</title>
+ <meta name="viewport" content="width=device-width, initial-scale=1" />
+ <style>
+ :root {
+ --bg: #050608;
+ --bg-alt: #0b0d12;
+ --fg: #e5f5ff;
+ --accent: #00ff9c;
+ --accent-soft: rgba(0, 255, 156, 0.12);
+ --muted: #7f8b9e;
+ --danger: #ff4b81;
+ --mono: "Fira Code", "JetBrains Mono", monospace;
+ --sans: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+ }
 
-    * {
-      box-sizing: border-box;
-    }
+ * {
+ box-sizing: border-box;
+ }
 
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: var(--sans);
-      background: radial-gradient(circle at top, #151b2a 0, #050608 55%);
-      color: var(--fg);
-      line-height: 1.6;
-    }
+ body {
+ margin: 0;
+ padding: 0;
+ font-family: var(--sans);
+ background: radial-gradient(circle at top, #151b2a 0, #050608 55%);
+ color: var(--fg);
+ line-height: 1.6;
+ }
 
-    a {
-      color: var(--accent);
-      text-decoration: none;
-    }
+ a {
+ color: var(--accent);
+ text-decoration: none;
+ }
 
-    a:hover {
-      text-decoration: underline;
-    }
+ a:hover {
+ text-decoration: underline;
+ }
 
-    .shell {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 32px 16px 64px;
-    }
+ .shell {
+ max-width: 1080px;
+ margin: 0 auto;
+ padding: 32px 16px 64px;
+ }
 
-    header {
-      padding: 24px 0 32px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      margin-bottom: 32px;
-    }
+ header {
+ padding: 24px 0 32px;
+ border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+ margin-bottom: 32px;
+ }
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: var(--accent-soft);
-      color: var(--accent);
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
+ .badge {
+ display: inline-flex;
+ align-items: center;
+ gap: 8px;
+ padding: 4px 10px;
+ border-radius: 999px;
+ background: var(--accent-soft);
+ color: var(--accent);
+ font-size: 11px;
+ letter-spacing: 0.08em;
+ text-transform: uppercase;
+ }
 
-    .badge-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: var(--accent);
-      box-shadow: 0 0 8px var(--accent);
-    }
+ .badge-dot {
+ width: 6px;
+ height: 6px;
+ border-radius: 999px;
+ background: var(--accent);
+ box-shadow: 0 0 8px var(--accent);
+ }
 
-    h1 {
-      font-size: 32px;
-      margin: 16px 0 8px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
+ h1 {
+ font-size: 32px;
+ margin: 16px 0 8px;
+ letter-spacing: 0.04em;
+ text-transform: uppercase;
+ }
 
-    h2 {
-      font-size: 22px;
-      margin: 32px 0 12px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
+ h2 {
+ font-size: 22px;
+ margin: 32px 0 12px;
+ letter-spacing: 0.04em;
+ text-transform: uppercase;
+ }
 
-    h3 {
-      font-size: 16px;
-      margin: 20px 0 8px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
+ h3 {
+ font-size: 16px;
+ margin: 20px 0 8px;
+ letter-spacing: 0.08em;
+ text-transform: uppercase;
+ }
 
-    p {
-      margin: 8px 0;
-      color: var(--fg);
-    }
+ p {
+ margin: 8px 0;
+ color: var(--fg);
+ }
 
-    .muted {
-      color: var(--muted);
-      font-size: 14px;
-    }
+ .muted {
+ color: var(--muted);
+ font-size: 14px;
+ }
 
-    .grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-      gap: 24px;
-      margin-top: 24px;
-      flex-wrap: wrap;
-    }
+ .grid {
+ display: grid;
+ grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+ gap: 24px;
+ margin-top: 24px;
+ flex-wrap: wrap;
+ }
 
-    @media (max-width: 800px) {
-      .grid {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
+ @media (max-width: 800px) {
+ .grid {
+ grid-template-columns: minmax(0, 1fr);
+ }
+ }
 
-    .card {
-      background: linear-gradient(145deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.6));
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      padding: 16px 18px;
-      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.7), 0 18px 40px rgba(0, 0, 0, 0.8);
-    }
+ .card {
+ background: linear-gradient(145deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.6));
+ border-radius: 14px;
+ border: 1px solid rgba(255, 255, 255, 0.06);
+ padding: 16px 18px;
+ box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.7), 0 18px 40px rgba(0, 0, 0, 0.8);
+ }
 
-    .card-title {
-      font-size: 13px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
+ .card-title {
+ font-size: 13px;
+ letter-spacing: 0.12em;
+ text-transform: uppercase;
+ color: var(--muted);
+ margin-bottom: 6px;
+ }
 
-    .card-main {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
+ .card-main {
+ font-size: 15px;
+ font-weight: 600;
+ margin-bottom: 4px;
+ }
 
-    .pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 8px;
-    }
+ .pill-row {
+ display: flex;
+ flex-wrap: wrap;
+ gap: 6px;
+ margin-top: 8px;
+ }
 
-    .pill {
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: var(--muted);
-      background: rgba(0, 0, 0, 0.4);
-    }
+ .pill {
+ font-size: 11px;
+ padding: 3px 8px;
+ border-radius: 999px;
+ border: 1px solid rgba(255, 255, 255, 0.12);
+ color: var(--muted);
+ background: rgba(0, 0, 0, 0.4);
+ }
 
-    .pill-accent {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: var(--accent-soft);
-    }
+ .pill-accent {
+ border-color: var(--accent);
+ color: var(--accent);
+ background: var(--accent-soft);
+ }
 
-    .mono {
-      font-family: var(--mono);
-      font-size: 13px;
-      background: #05070b;
-      border-radius: 8px;
-      padding: 10px 12px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      overflow-x: auto;
-      white-space: pre;
-    }
+ .mono {
+ font-family: var(--mono);
+ font-size: 13px;
+ background: #05070b;
+ border-radius: 8px;
+ padding: 10px 12px;
+ border: 1px solid rgba(255, 255, 255, 0.08);
+ overflow-x: auto;
+ white-space: pre;
+ }
 
-    .section {
-      margin-top: 40px;
-    }
+ .section {
+ margin-top: 40px;
+ }
 
-    .section-header {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
+ .section-header {
+ display: flex;
+ align-items: baseline;
+ justify-content: space-between;
+ gap: 12px;
+ flex-wrap: wrap;
+ }
 
-    .tagline {
-      font-size: 13px;
-      color: var(--muted);
-    }
+ .tagline {
+ font-size: 13px;
+ color: var(--muted);
+ }
 
-    .module-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 16px;
-      margin-top: 16px;
-    }
+ .module-grid {
+ display: grid;
+ grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+ gap: 16px;
+ margin-top: 16px;
+ }
 
-    .module-card {
-      background: radial-gradient(circle at top left, rgba(0, 255, 156, 0.12), rgba(0, 0, 0, 0.9));
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 14px 14px 12px;
-    }
+ .module-card {
+ background: radial-gradient(circle at top left, rgba(0, 255, 156, 0.12), rgba(0, 0, 0, 0.9));
+ border-radius: 14px;
+ border: 1px solid rgba(255, 255, 255, 0.08);
+ padding: 14px 14px 12px;
+ }
 
-    .module-name {
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
+ .module-name {
+ font-size: 14px;
+ font-weight: 600;
+ letter-spacing: 0.08em;
+ text-transform: uppercase;
+ margin-bottom: 4px;
+ }
 
-    .module-role {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
+ .module-role {
+ font-size: 12px;
+ color: var(--muted);
+ margin-bottom: 8px;
+ }
 
-    .module-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      font-size: 13px;
-    }
+ .module-list {
+ list-style: none;
+ padding: 0;
+ margin: 0;
+ font-size: 13px;
+ }
 
-    .module-list li {
-      margin-bottom: 4px;
-      position: relative;
-      padding-left: 14px;
-    }
+ .module-list li {
+ margin-bottom: 4px;
+ position: relative;
+ padding-left: 14px;
+ }
 
-    .module-list li::before {
-      content: "›";
-      position: absolute;
-      left: 0;
-      top: 0;
-      color: var(--accent);
-      font-size: 11px;
-    }
+ .module-list li::before {
+ content: "›";
+ position: absolute;
+ left: 0;
+ top: 0;
+ color: var(--accent);
+ font-size: 11px;
+ }
 
-    .diagram {
-      font-family: var(--mono);
-      font-size: 12px;
-      background: #05070b;
-      border-radius: 10px;
-      padding: 12px 14px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      overflow-x: auto;
-      white-space: pre;
-      margin-top: 12px;
-    }
+ .diagram {
+ font-family: var(--mono);
+ font-size: 12px;
+ background: #05070b;
+ border-radius: 10px;
+ padding: 12px 14px;
+ border: 1px solid rgba(255, 255, 255, 0.08);
+ overflow-x: auto;
+ white-space: pre;
+ margin-top: 12px;
+ }
 
-    footer {
-      margin-top: 48px;
-      padding-top: 16px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      font-size: 12px;
-      color: var(--muted);
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
+ footer {
+ margin-top: 48px;
+ padding-top: 16px;
+ border-top: 1px solid rgba(255, 255, 255, 0.06);
+ font-size: 12px;
+ color: var(--muted);
+ display: flex;
+ justify-content: space-between;
+ gap: 12px;
+ flex-wrap: wrap;
+ }
 
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: var(--accent);
-      box-shadow: 0 0 10px var(--accent);
-      display: inline-block;
-      margin-right: 6px;
-    }
+ .status-dot {
+ width: 8px;
+ height: 8px;
+ border-radius: 999px;
+ background: var(--accent);
+ box-shadow: 0 0 10px var(--accent);
+ display: inline-block;
+ margin-right: 6px;
+ }
 
-    .danger {
-      color: var(--danger);
-    }
-  </style>
+ .danger {
+ color: var(--danger);
+ }
+ </style>
 </head>
 <body>
-  <div class="shell">
-    <header>
-      <div class="badge">
-        <span class="badge-dot"></span>
-        <span>ZDOS ECOSYSTEM · CYBER OS MODULARE</span>
-      </div>
-      <h1>ZDOS · Zero‑Distance Operating System</h1>
-      <p class="muted">
-        Un ecosistema di super‑repo, moduli e subtree pensato come un <strong>organismo digitale</strong>:
-        cervello, memoria, blockchain, wallet e bootstrap OS, tutti orchestrati come un unico cyberdeck.
-      </p>
-      <div class="grid">
-        <div class="card">
-          <div class="card-title">Visione</div>
-          <div class="card-main">Un OS vivente, non un semplice progetto</div>
-          <p class="muted">
-            ZDOS non è “solo codice”: è una <strong>architettura modulare</strong> dove ogni repo è un organo
-            e ogni subtree è un vaso sanguigno. ENTERPRISE è il corpo, CORE è il cervello, MEMORY è la
-            memoria, HIGHCHAIN è il cuore, WALLET è la mano, GENESIS è il DNA.
-          </p>
-          <div class="pill-row">
-            <span class="pill pill-accent">Super‑repo</span>
-            <span class="pill">Subtree Git</span>
-            <span class="pill">Architettura modulare</span>
-            <span class="pill">Design da netrunner</span>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-title">Stack ad alto livello</div>
-          <div class="mono">
+ <div class="shell">
+ <header>
+ <div class="badge">
+ <span class="badge-dot"></span>
+ <span>ZDOS ECOSYSTEM · CYBER OS MODULARE</span>
+ </div>
+ <h1>ZDOS · Zero‑Distance Operating System</h1>
+ <p class="muted">
+ Un ecosistema di super‑repo, moduli e subtree pensato come un <strong>organismo digitale</strong>:
+ cervello, memoria, blockchain, wallet e bootstrap OS, tutti orchestrati come un unico cyberdeck.
+ </p>
+ <div class="grid">
+ <div class="card">
+ <div class="card-title">Visione</div>
+ <div class="card-main">Un OS vivente, non un semplice progetto</div>
+ <p class="muted">
+ ZDOS non è “solo codice”: è una <strong>architettura modulare</strong> dove ogni repo è un organo
+ e ogni subtree è un vaso sanguigno. ENTERPRISE è il corpo, CORE è il cervello, MEMORY è la
+ memoria, HIGHCHAIN è il cuore, WALLET è la mano, GENESIS è il DNA.
+ </p>
+ <div class="pill-row">
+ <span class="pill pill-accent">Super‑repo</span>
+ <span class="pill">Subtree Git</span>
+ <span class="pill">Architettura modulare</span>
+ <span class="pill">Design da netrunner</span>
+ </div>
+ </div>
+ <div class="card">
+ <div class="card-title">Stack ad alto livello</div>
+ <div class="mono">
 ZDOS-ENTERPRISE-STACK/
-  ├─ modules/
-  │   ├─ HIGHCHAIN-V2/      # motore blockchain
-  │   └─ Z-WALLET-SUITE/    # wallet suite modulare
-  └─ core, memory, genesis  # integrabili come moduli di sistema
-          </div>
-          <p class="muted" style="margin-top:8px;">
-            Tutto è pensato per essere <strong>clonato, integrato, versionato</strong> e
-            ricombinato senza perdere storia né coerenza.
-          </p>
-        </div>
-      </div>
-    </header>
+ ├─ modules/
+ │ ├─ HIGHCHAIN-V2/ # motore blockchain
+ │ └─ Z-WALLET-SUITE/ # wallet suite modulare
+ └─ core, memory, genesis # integrabili come moduli di sistema
+ </div>
+ <p class="muted" style="margin-top:8px;">
+ Tutto è pensato per essere <strong>clonato, integrato, versionato</strong> e
+ ricombinato senza perdere storia né coerenza.
+ </p>
+ </div>
+ </div>
+ </header>
 
-    <!-- Panoramica -->
-    <section class="section" id="overview">
-      <div class="section-header">
-        <h2>Panoramica dell’ecosistema ZDOS</h2>
-        <span class="tagline">Un cervello distribuito fatto di repo Git e subtree intelligenti</span>
-      </div>
-      <p>
-        L’ecosistema ZDOS è costruito come una <strong>costellazione di super‑repo</strong>, ognuno con un ruolo
-        preciso. I moduli non sono semplici librerie: sono <strong>domini funzionali completi</strong> che vivono
-        dentro stack più grandi tramite <code>git subtree</code>, mantenendo la storia e l’indipendenza.
-      </p>
-      <p>
-        Il cuore operativo è <strong>ZDOS‑ENTERPRISE‑STACK</strong>, che integra i moduli critici come
-        <strong>HIGHCHAIN‑V2</strong> (blockchain) e <strong>Z‑WALLET‑SUITE</strong> (wallet), mentre
-        <strong>ZDOS‑CORE‑v2</strong>, <strong>Z‑MEMORY‑ENGIGNE</strong> e <strong>Z‑GENESIS‑OS</strong> definiscono
-        rispettivamente il cervello, la memoria e il DNA del sistema.
-      </p>
-    </section>
+ <!-- Panoramica -->
+ <section class="section" id="overview">
+ <div class="section-header">
+ <h2>Panoramica dell’ecosistema ZDOS</h2>
+ <span class="tagline">Un cervello distribuito fatto di repo Git e subtree intelligenti</span>
+ </div>
+ <p>
+ L’ecosistema ZDOS è costruito come una <strong>costellazione di super‑repo</strong>, ognuno con un ruolo
+ preciso. I moduli non sono semplici librerie: sono <strong>domini funzionali completi</strong> che vivono
+ dentro stack più grandi tramite <code>git subtree</code>, mantenendo la storia e l’indipendenza.
+ </p>
+ <p>
+ Il cuore operativo è <strong>ZDOS‑ENTERPRISE‑STACK</strong>, che integra i moduli critici come
+ <strong>HIGHCHAIN‑V2</strong> (blockchain) e <strong>Z‑WALLET‑SUITE</strong> (wallet), mentre
+ <strong>ZDOS‑CORE‑v2</strong>, <strong>Z‑MEMORY‑ENGIGNE</strong> e <strong>Z‑GENESIS‑OS</strong> definiscono
+ rispettivamente il cervello, la memoria e il DNA del sistema.
+ </p>
+ </section>
 
-    <!-- Moduli principali -->
-    <section class="section" id="modules">
-      <div class="section-header">
-        <h2>Moduli principali</h2>
-        <span class="tagline">Ogni modulo è un organo dell’organismo ZDOS</span>
-      </div>
+ <!-- Moduli principali -->
+ <section class="section" id="modules">
+ <div class="section-header">
+ <h2>Moduli principali</h2>
+ <span class="tagline">Ogni modulo è un organo dell’organismo ZDOS</span>
+ </div>
 
-      <div class="module-grid">
-        <!-- ZDOS-ENTERPRISE-STACK -->
-        <div class="module-card">
-          <div class="module-name">ZDOS-ENTERPRISE-STACK</div>
-          <div class="module-role">Super‑repo · Città‑stato dell’ecosistema</div>
-          <ul class="module-list">
-            <li>Contiene i moduli <strong>HIGHCHAIN‑V2</strong> e <strong>Z‑WALLET‑SUITE</strong> come subtree.</li>
-            <li>È il punto di ingresso per deployment, integrazioni e orchestrazione enterprise.</li>
-            <li>Può integrare CORE, MEMORY, GENESIS come moduli di sistema.</li>
-          </ul>
-          <div class="pill-row" style="margin-top:10px;">
-            <span class="pill pill-accent">Stack Enterprise</span>
-            <span class="pill">Subtree multipli</span>
-            <span class="pill">Entry‑point</span>
-          </div>
-        </div>
+ <div class="module-grid">
+ <!-- ZDOS-ENTERPRISE-STACK -->
+ <div class="module-card">
+ <div class="module-name">ZDOS-ENTERPRISE-STACK</div>
+ <div class="module-role">Super‑repo · Città‑stato dell’ecosistema</div>
+ <ul class="module-list">
+ <li>Contiene i moduli <strong>HIGHCHAIN‑V2</strong> e <strong>Z‑WALLET‑SUITE</strong> come subtree.</li>
+ <li>È il punto di ingresso per deployment, integrazioni e orchestrazione enterprise.</li>
+ <li>Può integrare CORE, MEMORY, GENESIS come moduli di sistema.</li>
+ </ul>
+ <div class="pill-row" style="margin-top:10px;">
+ <span class="pill pill-accent">Stack Enterprise</span>
+ <span class="pill">Subtree multipli</span>
+ <span class="pill">Entry‑point</span>
+ </div>
+ </div>
 
-        <!-- ZDOS-CORE-v2 -->
-        <div class="module-card">
-          <div class="module-name">ZDOS-CORE-v2</div>
-          <div class="module-role">Core OS · Cervello del sistema</div>
-          <ul class="module-list">
-            <li>Definisce le primitive di sistema, i pattern architetturali e le convenzioni.</li>
-            <li>Funziona come “kernel mentale” per orchestrare moduli e servizi.</li>
-            <li>Può essere integrato in ENTERPRISE come modulo di sistema.</li>
-          </ul>
-          <div class="pill-row" style="margin-top:10px;">
-            <span class="pill pill-accent">Core</span>
-            <span class="pill">Pattern architetturali</span>
-            <span class="pill">Orchestrazione</span>
-          </div>
-        </div>
+ <!-- ZDOS-CORE-v2 -->
+ <div class="module-card">
+ <div class="module-name">ZDOS-CORE-v2</div>
+ <div class="module-role">Core OS · Cervello del sistema</div>
+ <ul class="module-list">
+ <li>Definisce le primitive di sistema, i pattern architetturali e le convenzioni.</li>
+ <li>Funziona come “kernel mentale” per orchestrare moduli e servizi.</li>
+ <li>Può essere integrato in ENTERPRISE come modulo di sistema.</li>
+ </ul>
+ <div class="pill-row" style="margin-top:10px;">
+ <span class="pill pill-accent">Core</span>
+ <span class="pill">Pattern architetturali</span>
+ <span class="pill">Orchestrazione</span>
+ </div>
+ </div>
 
-        <!-- Z-MEMORY-ENGIGNE -->
-        <div class="module-card">
-          <div class="module-name">Z-MEMORY-ENGIGNE</div>
-          <div class="module-role">Memory Engine · Ippocampo digitale</div>
-          <ul class="module-list">
-            <li>Gestisce memoria, contesto, snapshot e ricostruzione dello stato.</li>
-            <li>Progettato come “memoria biologica” per sistemi intelligenti.</li>
-            <li>Integrabile come modulo di supporto in ENTERPRISE o altri stack.</li>
-          </ul>
-          <div class="pill-row" style="margin-top:10px;">
-            <span class="pill pill-accent">Memory</span>
-            <span class="pill">Snapshot</span>
-            <span class="pill">Context engine</span>
-          </div>
-        </div>
+ <!-- Z-MEMORY-ENGIGNE -->
+ <div class="module-card">
+ <div class="module-name">Z-MEMORY-ENGIGNE</div>
+ <div class="module-role">Memory Engine · Ippocampo digitale</div>
+ <ul class="module-list">
+ <li>Gestisce memoria, contesto, snapshot e ricostruzione dello stato.</li>
+ <li>Progettato come “memoria biologica” per sistemi intelligenti.</li>
+ <li>Integrabile come modulo di supporto in ENTERPRISE o altri stack.</li>
+ </ul>
+ <div class="pill-row" style="margin-top:10px;">
+ <span class="pill pill-accent">Memory</span>
+ <span class="pill">Snapshot</span>
+ <span class="pill">Context engine</span>
+ </div>
+ </div>
 
-        <!-- Z-GENESIS-OS -->
-        <div class="module-card">
-          <div class="module-name">Z-GENESIS-OS</div>
-          <div class="module-role">Bootstrap OS · DNA del sistema</div>
-          <ul class="module-list">
-            <li>Super‑repo “vuoto” pensato come punto di partenza e bootstrap.</li>
-            <li>Rappresenta il DNA architetturale: naming, struttura, convenzioni.</li>
-            <li>Può essere importato in ENTERPRISE come modulo di base.</li>
-          </ul>
-          <div class="pill-row" style="margin-top:10px;">
-            <span class="pill pill-accent">Bootstrap</span>
-            <span class="pill">DNA</span>
-            <span class="pill">Template OS</span>
-          </div>
-        </div>
+ <!-- Z-GENESIS-OS -->
+ <div class="module-card">
+ <div class="module-name">Z-GENESIS-OS</div>
+ <div class="module-role">Bootstrap OS · DNA del sistema</div>
+ <ul class="module-list">
+ <li>Super‑repo “vuoto” pensato come punto di partenza e bootstrap.</li>
+ <li>Rappresenta il DNA architetturale: naming, struttura, convenzioni.</li>
+ <li>Può essere importato in ENTERPRISE come modulo di base.</li>
+ </ul>
+ <div class="pill-row" style="margin-top:10px;">
+ <span class="pill pill-accent">Bootstrap</span>
+ <span class="pill">DNA</span>
+ <span class="pill">Template OS</span>
+ </div>
+ </div>
 
-        <!-- HIGHCHAIN-V2 -->
-        <div class="module-card">
-          <div class="module-name">HIGHCHAIN-V2</div>
-          <div class="module-role">Blockchain Engine · Reattore a fusione</div>
-          <ul class="module-list">
-            <li>Motore blockchain integrato come subtree in ZDOS‑ENTERPRISE‑STACK.</li>
-            <li>Gestisce logica di chain, bridgechain, protocolli e rete.</li>
-            <li>Può vivere sia come repo standalone che come modulo enterprise.</li>
-          </ul>
-          <div class="pill-row" style="margin-top:10px;">
-            <span class="pill pill-accent">Blockchain</span>
-            <span class="pill">Bridgechain</span>
-            <span class="pill">Motore di rete</span>
-          </div>
-        </div>
+ <!-- HIGHCHAIN-V2 -->
+ <div class="module-card">
+ <div class="module-name">HIGHCHAIN-V2</div>
+ <div class="module-role">Blockchain Engine · Reattore a fusione</div>
+ <ul class="module-list">
+ <li>Motore blockchain integrato come subtree in ZDOS‑ENTERPRISE‑STACK.</li>
+ <li>Gestisce logica di chain, bridgechain, protocolli e rete.</li>
+ <li>Può vivere sia come repo standalone che come modulo enterprise.</li>
+ </ul>
+ <div class="pill-row" style="margin-top:10px;">
+ <span class="pill pill-accent">Blockchain</span>
+ <span class="pill">Bridgechain</span>
+ <span class="pill">Motore di rete</span>
+ </div>
+ </div>
 
-        <!-- Z-WALLET-SUITE -->
-        <div class="module-card">
-          <div class="module-name">Z-WALLET-SUITE</div>
-          <div class="module-role">Wallet Suite · Guanto del netrunner</div>
-          <ul class="module-list">
-            <li>Super‑repo che integra il wallet (es. x‑zdos‑wallet) come modulo.</li>
-            <li>Importato come subtree in ZDOS‑ENTERPRISE‑STACK.</li>
-            <li>Progettato per gestire wallet, connessioni, UX e sicurezza.</li>
-          </ul>
-          <div class="pill-row" style="margin-top:10px;">
-            <span class="pill pill-accent">Wallet</span>
-            <span class="pill">Suite modulare</span>
-            <span class="pill">Sicurezza</span>
-          </div>
-        </div>
-      </div>
-    </section>
+ <!-- Z-WALLET-SUITE -->
+ <div class="module-card">
+ <div class="module-name">Z-WALLET-SUITE</div>
+ <div class="module-role">Wallet Suite · Guanto del netrunner</div>
+ <ul class="module-list">
+ <li>Super‑repo che integra il wallet (es. x‑zdos‑wallet) come modulo.</li>
+ <li>Importato come subtree in ZDOS‑ENTERPRISE‑STACK.</li>
+ <li>Progettato per gestire wallet, connessioni, UX e sicurezza.</li>
+ </ul>
+ <div class="pill-row" style="margin-top:10px;">
+ <span class="pill pill-accent">Wallet</span>
+ <span class="pill">Suite modulare</span>
+ <span class="pill">Sicurezza</span>
+ </div>
+ </div>
+ </div>
+ </section>
 
-    <!-- Architettura -->
-    <section class="section" id="architecture">
-      <div class="section-header">
-        <h2>Architettura logica</h2>
-        <span class="tagline">Come i moduli si incastrano tra loro</span>
-      </div>
-      <p>
-        L’architettura ZDOS è pensata come un <strong>mecha software</strong>: ogni modulo è un organo
-        specializzato, ma tutti condividono lo stesso linguaggio strutturale. Git e i subtree vengono
-        usati come “tessuto connettivo” per mantenere storia, integrità e indipendenza dei componenti.
-      </p>
+ <!-- Architettura -->
+ <section class="section" id="architecture">
+ <div class="section-header">
+ <h2>Architettura logica</h2>
+ <span class="tagline">Come i moduli si incastrano tra loro</span>
+ </div>
+ <p>
+ L’architettura ZDOS è pensata come un <strong>mecha software</strong>: ogni modulo è un organo
+ specializzato, ma tutti condividono lo stesso linguaggio strutturale. Git e i subtree vengono
+ usati come “tessuto connettivo” per mantenere storia, integrità e indipendenza dei componenti.
+ </p>
 
-      <div class="diagram">
+ <div class="diagram">
 ZDOS-ENTERPRISE-STACK
 │
 ├─ modules/
-│   ├─ HIGHCHAIN-V2        # motore blockchain
-│   └─ Z-WALLET-SUITE      # suite wallet
+│ ├─ HIGHCHAIN-V2 # motore blockchain
+│ └─ Z-WALLET-SUITE # suite wallet
 │
 ├─ (integrazione futura)
-│   ├─ ZDOS-CORE-v2        # core logico dell'OS
-│   ├─ Z-MEMORY-ENGIGNE    # memoria e contesto
-│   └─ Z-GENESIS-OS        # bootstrap / DNA
+│ ├─ ZDOS-CORE-v2 # core logico dell'OS
+│ ├─ Z-MEMORY-ENGIGNE # memoria e contesto
+│ └─ Z-GENESIS-OS # bootstrap / DNA
 │
 └─ pipeline, deploy, integrazioni esterne
-      </div>
+ </div>
 
-      <p style="margin-top:12px;">
-        Ogni modulo può essere sviluppato in modo indipendente, versionato, taggato e poi
-        <strong>ri‑innestato</strong> nello stack enterprise tramite <code>git subtree</code>, senza perdere
-        la storia né rompere l’architettura.
-      </p>
-    </section>
+ <p style="margin-top:12px;">
+ Ogni modulo può essere sviluppato in modo indipendente, versionato, taggato e poi
+ <strong>ri‑innestato</strong> nello stack enterprise tramite <code>git subtree</code>, senza perdere
+ la storia né rompere l’architettura.
+ </p>
+ </section>
 
-    <!-- Sezione "per nerd" -->
-    <section class="section" id="nerd">
-      <div class="section-header">
-        <h2>Per i nerd e i netrunner</h2>
-        <span class="tagline">Come leggere ZDOS con occhi da hacker</span>
-      </div>
-      <p>
-        Se guardi ZDOS con occhi da hacker, non vedi “solo repo”: vedi un <strong>organismo digitale</strong>.
-        ENTERPRISE è la città‑stato, CORE è la centrale neurale, MEMORY è l’ippocampo, HIGHCHAIN è il cuore
-        che pompa transazioni, WALLET è la mano che tocca il mondo esterno, GENESIS è il DNA che definisce
-        come tutto questo nasce e si replica.
-      </p>
-      <p>
-        L’obiettivo non è avere “un progetto che funziona”, ma un <strong>ecosistema che può mutare</strong>:
-        aggiungere moduli, sostituire componenti, clonare stack, creare nuove istanze senza perdere coerenza.
-        ZDOS è pensato come un <strong>cyberdeck software</strong> che puoi potenziare nel tempo.
-      </p>
-      <div class="mono" style="margin-top:10px;">
+ <!-- Sezione "per nerd" -->
+ <section class="section" id="nerd">
+ <div class="section-header">
+ <h2>Per i nerd e i netrunner</h2>
+ <span class="tagline">Come leggere ZDOS con occhi da hacker</span>
+ </div>
+ <p>
+ Se guardi ZDOS con occhi da hacker, non vedi “solo repo”: vedi un <strong>organismo digitale</strong>.
+ ENTERPRISE è la città‑stato, CORE è la centrale neurale, MEMORY è l’ippocampo, HIGHCHAIN è il cuore
+ che pompa transazioni, WALLET è la mano che tocca il mondo esterno, GENESIS è il DNA che definisce
+ come tutto questo nasce e si replica.
+ </p>
+ <p>
+ L’obiettivo non è avere “un progetto che funziona”, ma un <strong>ecosistema che può mutare</strong>:
+ aggiungere moduli, sostituire componenti, clonare stack, creare nuove istanze senza perdere coerenza.
+ ZDOS è pensato come un <strong>cyberdeck software</strong> che puoi potenziare nel tempo.
+ </p>
+ <div class="mono" style="margin-top:10px;">
 # Filosofia ZDOS (versione breve)
 - Ogni repo è un organo.
 - Ogni subtree è un vaso sanguigno.
@@ -509,18 +509,18 @@ ZDOS-ENTERPRISE-STACK
 - HIGHCHAIN è il cuore.
 - WALLET è la mano.
 - GENESIS è il DNA.
-      </div>
-    </section>
+ </div>
+ </section>
 
-    <footer>
-      <div>
-        <span class="status-dot"></span>
-        ZDOS Ecosystem · Design modulare, orientato a super‑repo e subtree Git.
-      </div>
-      <div>
-        Stato: <span class="pill pill-accent">In evoluzione continua</span>
-      </div>
-    </footer>
-  </div>
+ <footer>
+ <div>
+ <span class="status-dot"></span>
+ ZDOS Ecosystem · Design modulare, orientato a super‑repo e subtree Git.
+ </div>
+ <div>
+ Stato: <span class="pill pill-accent">In evoluzione continua</span>
+ </div>
+ </footer>
+ </div>
 </body>
 </html>
