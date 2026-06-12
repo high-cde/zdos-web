@@ -1,45 +1,61 @@
 #!/bin/bash
 
 echo "=============================="
-echo "   ZDOS-WEB AUTO-FIX v2.0"
+echo "   ZDOS-WEB AUTOBUILD MASTER"
 echo "=============================="
 
 # 1) Check repo
 if [ ! -d .git ]; then
-  echo "❌ Non sei dentro un repo Git!"
+  echo "❌ Non sei in un repo Git!"
   exit 1
 fi
 
-# 2) Check HTML files
-missing=0
-for f in index.html zlang-ide.html; do
-  if [ ! -f "$f" ]; then
-    echo "❌ Manca: $f"
-    missing=1
-  fi
-done
+# 2) Assicura index.html con redirect base
+if [ ! -f index.html ]; then
+  echo "🧩 Creo index.html con redirect all'IDE..."
+  cat << 'EOR' > index.html
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0; url=zlang-ide.html">
+  <title>ZDOS Redirect</title>
+  <style>
+    body { background:#000; color:#0f0; font-family:monospace; padding:40px; }
+  </style>
+</head>
+<body>
+  Reindirizzamento a Z‑LANG IDE PRO…
+</body>
+</html>
+EOR
+fi
 
-if [ $missing -eq 1 ]; then
-  echo "⚠ Copia i file HTML nella cartella e rilancia."
+# 3) Check IDE
+if [ ! -f zlang-ide.html ]; then
+  echo "❌ Manca zlang-ide.html (crealo o copialo qui e rilancia)."
   exit 1
 fi
 
-# 3) Pull
-git pull --rebase
+# 4) Pull
+echo "📥 Pull..."
+git pull --rebase || echo "⚠ Pull non riuscito, continuo comunque."
 
-# 4) Add + Commit
-git add index.html zlang-ide.html
-git commit -m "AutoFix: update ZDOS web + IDE PRO" || echo "⚠ Nessun cambiamento"
+# 5) Add + Commit
+echo "📝 Commit..."
+git add index.html zlang-ide.html autobuild.sh
+git commit -m "Autobuild: update ZDOS web + IDE" || echo "⚠ Nessun cambiamento da committare."
 
-# 5) Push
-git push
+# 6) Push
+echo "🚀 Push su origin..."
+git push origin main
 
 echo
 echo "=============================="
 echo "   DEPLOY COMPLETATO"
 echo "=============================="
-echo "🌍 Sito online:"
+echo "🌍 Sito:"
 echo "https://high-cde.github.io/zdos-web/"
-echo "IDE Z-LANG PRO:"
+echo "IDE:"
 echo "https://high-cde.github.io/zdos-web/zlang-ide.html"
 echo "=============================="
