@@ -1,0 +1,139 @@
+{
+  "genesis": {
+    "kernel": {
+      "init": {
+        "description": "Inizializza il kernel Z-GENESIS-OS, carica moduli core, prepara FS e VM.",
+        "returns": "bool"
+      },
+      "shutdown": {
+        "description": "Arresto controllato del kernel.",
+        "params": { "code": "int" },
+        "returns": "void"
+      },
+      "ping": {
+        "description": "Verifica lo stato del kernel.",
+        "returns": "bool"
+      },
+      "version": {
+        "description": "Ritorna la versione del kernel.",
+        "returns": "string"
+      }
+    },
+
+    "fs": {
+      "read": {
+        "description": "Legge un file dal filesystem virtuale Z-FS.",
+        "params": { "path": "string" },
+        "returns": "string|bytes"
+      },
+      "write": {
+        "description": "Scrive o aggiorna un file.",
+        "params": { "path": "string", "data": "string|bytes" },
+        "returns": "bool"
+      },
+      "exists": {
+        "description": "Verifica se un file o directory esiste.",
+        "params": { "path": "string" },
+        "returns": "bool"
+      },
+      "list": {
+        "description": "Lista i contenuti di una directory.",
+        "params": { "path": "string" },
+        "returns": "array<string>"
+      },
+      "delete": {
+        "description": "Elimina una risorsa dal filesystem.",
+        "params": { "path": "string" },
+        "returns": "bool"
+      }
+    },
+
+    "proc": {
+      "spawn": {
+        "description": "Crea un nuovo processo logico.",
+        "params": {
+          "name": "string",
+          "entry": "string",
+          "args": "array"
+        },
+        "returns": "pid:int"
+      },
+      "kill": {
+        "description": "Termina un processo.",
+        "params": { "pid": "int" },
+        "returns": "bool"
+      },
+      "status": {
+        "description": "Ritorna lo stato di un processo.",
+        "params": { "pid": "int" },
+        "returns": "{ state, exit_code }"
+      },
+      "list": {
+        "description": "Lista dei processi attivi.",
+        "returns": "array<{ pid, name, state }>"
+      }
+    },
+
+    "vm": {
+      "load": {
+        "description": "Carica un programma Z-LANG o bytecode.",
+        "params": { "source": "string|bytes" },
+        "returns": "program_id:string"
+      },
+      "run": {
+        "description": "Esegue un programma in un contesto.",
+        "params": {
+          "program_id": "string",
+          "context": "object"
+        },
+        "returns": "any"
+      },
+      "eval": {
+        "description": "Esegue codice Z-LANG in modalità REPL.",
+        "params": { "code": "string" },
+        "returns": "any"
+      },
+      "abort": {
+        "description": "Interrompe un'esecuzione in corso.",
+        "params": { "program_id": "string" },
+        "returns": "bool"
+      }
+    },
+
+    "io": {
+      "log": {
+        "description": "Log strutturato.",
+        "params": {
+          "level": "string",
+          "message": "string",
+          "meta": "object?"
+        },
+        "returns": "void"
+      },
+      "console_write": {
+        "description": "Scrive sulla console virtuale.",
+        "params": { "line": "string" },
+        "returns": "void"
+      },
+      "console_read": {
+        "description": "Legge input dalla console.",
+        "returns": "string"
+      }
+    },
+
+    "sys": {
+      "info": {
+        "description": "Ritorna informazioni sul sistema.",
+        "returns": "{ kernel, arch, build, uptime }"
+      },
+      "capabilities": {
+        "description": "Lista delle feature abilitate.",
+        "returns": "array<string>"
+      },
+      "time": {
+        "description": "Timestamp corrente.",
+        "returns": "int"
+      }
+    }
+  }
+}
