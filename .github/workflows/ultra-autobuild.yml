@@ -1,0 +1,259 @@
+name: ZDOS ULTRA AUTOBUILD
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  autobuild:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ---------------------------------------------------------
+      # CHECKOUT + NODE
+      # ---------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # ---------------------------------------------------------
+      # 1) ULTRA CACHE BOOST
+      # ---------------------------------------------------------
+      - name: ULTRA Cache Boost
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+            dist
+            core/genesis
+          key: ${{ runner.os }}-zdos-${{ hashFiles('package-lock.json') }}-${{ hashFiles('core/genesis/**') }}
+          restore-keys: |
+            ${{ runner.os }}-zdos-
+
+      # ---------------------------------------------------------
+      # 2) HARDENING ZDOS
+      # ---------------------------------------------------------
+      - name: Hardening ZDOS — Integrity & Security Layer
+        run: |
+          echo ">>> HARDENING ZDOS ATTIVO"
+
+          echo ">> Verifica integrità package-lock.json"
+          if [ ! -f package-lock.json ]; then
+            echo "ERRORE: package-lock.json mancante. Deploy bloccato."
+            exit 1
+          fi
+
+          echo ">> Verifica file critici GENESIS"
+          REQUIRED_FILES=(
+            "core/genesis/core.js"
+            "core/genesis/api.js"
+            "core/genesis/modules.js"
+            "core/genesis/boot.js"
+            "core/genesis/fs.js"
+            "core/genesis/vm-bridge.js"
+          )
+
+          for FILE in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "$FILE" ]; then
+              echo "ERRORE: File critico mancante: $FILE"
+              exit 1
+            fi
+          done
+
+          echo ">> Controllo permessi file"
+          find . -type f -exec chmod 644 {} \;
+          find . -type d -exec chmod 755 {} \;
+
+          echo ">> Anti‑tamper: verifica modifiche non tracciate"
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "ERRORE: Modifiche non tracciate rilevate. Deploy bloccato."
+            git status
+            exit 1
+          fi
+
+          echo ">> Hardening ZDOS completato"
+
+      # ---------------------------------------------------------
+      # 3) HARDENING EXTREME — SHA256 TOTAL INTEGRITY
+      # ---------------------------------------------------------
+      - name: Hardening EXTREME — SHA256 Integrity Verification
+        run: |
+          echo ">>> HARDENING EXTREME ATTIVO"
+
+          echo ">> Generazione lista file"
+          find . -type f ! -path "./.git/*" ! -path "./dist/*" | sort > filelist.txt
+
+          echo ">> Calcolo SHA256 corrente"
+          sha256sum $(cat filelist.txt) > sha256-current.txt
+
+          echo ">> Verifica presenza firma di riferimento"
+          if [ ! -f sha256-reference.txt ]; then
+            echo "ATTENZIONE: Nessuna firma di riferimento trovata."
+            echo "Creo sha256-reference.txt per la prima volta."
+            cp sha256-current.txt sha256-reference.txt
+            exit 0
+          fi
+
+          echo ">> Confronto integrità"
+          diff sha256-current.txt sha256-reference.txt > sha256-diff.txt || true
+
+          if [ -s sha256-diff.txt ]; then
+            echo "ERRORE: Integrità compromessa!"
+            cat sha256-diff.txt
+            exit 1
+          fi
+
+          echo ">> Integrità totale confermata"
+
+      # ---------------------------------------------------------
+      # 4) HARDENING Z-LANG COMPILER
+      # ---------------------------------------------------------
+      - name: Hardening Z-LANG Compiler — Opcode & Bytecode Validation
+        run: |
+          echo ">>> HARDENING Z-LANG COMPILER ATTIVO"
+
+          echo ">> Scansione file Z-LANG"
+          find . -type f \( -name "*.zlang" -o -name "*.z" \) > zlang-files.txt || true
+
+          if [ ! -s zlang-files.txt ]; then
+            echo "Nessun file Z-LANG trovato. Procedo."
+            exit 0
+          fi
+
+          echo ">> Validazione sintassi Z-LANG"
+          while read FILE; do
+            node tools/zlang-validate-syntax.js "$FILE" || exit 1
+          done < zlang-files.txt
+
+          echo ">> Validazione opcode"
+          while read FILE; do
+            node tools/zlang-validate-opcode.js "$FILE" || exit 1
+          done < zlang-files.txt
+
+          echo ">> Validazione bytecode"
+          find . -type f -name "*.zbc" > zbc-files.txt || true
+
+          if [ -s zbc-files.txt ]; then
+            while read FILE; do
+              node tools/zvm-validate-bytecode.js "$FILE" || exit 1
+            done < zbc-files.txt
+          fi
+
+          echo ">> Validazione Z-LANG COMPLETATA"
+
+      # ---------------------------------------------------------
+      # 5) Z-LANG ULTRA SEMANTIC
+      # ---------------------------------------------------------
+      - name: Z-LANG Ultra Semantic — Advanced Semantic Analysis
+        run: |
+          echo ">>> Z-LANG ULTRA SEMANTIC ATTIVO"
+
+          echo ">> Scansione file Z-LANG"
+          find . -type f \( -name "*.zlang" -o -name "*.z" \) > zlang-files.txt || true
+
+          if [ ! -s zlang-files.txt ]; then
+            echo "Nessun file Z-LANG trovato. Procedo."
+            exit 0
+          fi
+
+          echo ">> Analisi semantica avanzata"
+          while read FILE; do
+            node tools/zlang-semantic-analyzer.js "$FILE" || exit 1
+          done < zlang-files.txt
+
+          echo ">> Analisi flusso di controllo"
+          while read FILE; do
+            node tools/zlang-flow-check.js "$FILE" || exit 1
+          done < zlang-files.txt
+
+          echo ">> Stack Safety Analysis"
+          while read FILE; do
+            node tools/zlang-stack-analyzer.js "$FILE" || exit 1
+          done < zlang-files.txt
+
+          echo ">> Coerenza Z-LANG → Bytecode"
+          find . -type f -name "*.zbc" > zbc-files.txt || true
+
+          if [ -s zbc-files.txt ]; then
+            while read FILE; do
+              node tools/zvm-bytecode-consistency.js "$FILE" || exit 1
+            done < zbc-files.txt
+          fi
+
+          echo ">> Z-LANG ULTRA SEMANTIC COMPLETATO"
+
+      # ---------------------------------------------------------
+      # 6) Z-LANG HYPER OPTIMIZER
+      # ---------------------------------------------------------
+      - name: Z-LANG Hyper Optimizer — Advanced Code Optimization
+        run: |
+          echo ">>> Z-LANG HYPER OPTIMIZER ATTIVO"
+
+          echo ">> Scansione file Z-LANG"
+          find . -type f \( -name "*.zlang" -o -name "*.z" \) > zlang-files.txt || true
+
+          if [ ! -s zlang-files.txt ]; then
+            echo "Nessun file Z-LANG trovato. Procedo."
+            exit 0
+          fi
+
+          echo ">> Ottimizzazione codice Z-LANG"
+          while read FILE; do
+            node tools/zlang-optimizer.js "$FILE" || exit 1
+          done < zlang-files.txt
+
+          echo ">> Rigenerazione bytecode ottimizzato"
+          while read FILE; do
+            OUT="${FILE%.*}.zbc"
+            node tools/zlang-compile.js "$FILE" "$OUT" --optimized || exit 1
+          done < zlang-files.txt
+
+          echo ">> Z-LANG HYPER OPTIMIZER COMPLETATO"
+
+      # ---------------------------------------------------------
+      # 7) INSTALL + BUILD + VALIDATE + DEPLOY
+      # ---------------------------------------------------------
+      - name: Install dependencies
+        run: npm install
+
+      - name: Sync GENESIS Kernel
+        run: |
+          mkdir -p core/genesis
+          cp -r genesis/* core/genesis/ || true
+
+      - name: Validate Z-LANG
+        run: node tools/validate-zlang.js
+
+      - name: Validate Z-VM
+        run: node tools/validate-zvm.js
+
+      - name: Build ZDOS IDE
+        run: npm run build
+
+      - name: Prepare GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    needs: autobuild
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
