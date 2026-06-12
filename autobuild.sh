@@ -1,42 +1,39 @@
 #!/bin/bash
 
 echo "=============================="
-echo "   ZDOS-WEB AUTO-BUILD v1.0"
+echo "   ZDOS-WEB AUTO-FIX v2.0"
 echo "=============================="
 
-# 1) Verifica repo
+# 1) Check repo
 if [ ! -d .git ]; then
   echo "❌ Non sei dentro un repo Git!"
   exit 1
 fi
 
-# 2) Verifica file HTML
-if [ ! -f index.html ] || [ ! -f zlang-ide.html ]; then
-  echo "❌ Mancano index.html o zlang-ide.html!"
+# 2) Check HTML files
+missing=0
+for f in index.html zlang-ide.html; do
+  if [ ! -f "$f" ]; then
+    echo "❌ Manca: $f"
+    missing=1
+  fi
+done
+
+if [ $missing -eq 1 ]; then
+  echo "⚠ Copia i file HTML nella cartella e rilancia."
   exit 1
 fi
 
-# 3) Pull aggiornamenti
-echo "📥 Pull aggiornamenti..."
+# 3) Pull
 git pull --rebase
 
-# 4) Aggiungi file
-echo "📦 Aggiungo file..."
+# 4) Add + Commit
 git add index.html zlang-ide.html
+git commit -m "AutoFix: update ZDOS web + IDE PRO" || echo "⚠ Nessun cambiamento"
 
-# 5) Commit automatico
-echo "📝 Commit..."
-git commit -m "AutoBuild: update ZDOS web + Z-LANG IDE PRO" || echo "⚠ Nessun cambiamento da committare"
-
-# 6) Push
-echo "🚀 Push su origin..."
+# 5) Push
 git push
 
-# 7) Attiva GitHub Pages (se necessario)
-echo "🌐 Verifica GitHub Pages..."
-echo " - Vai su Settings → Pages → Source: main / root"
-
-# 8) URL finale
 echo
 echo "=============================="
 echo "   DEPLOY COMPLETATO"
