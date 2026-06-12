@@ -1,15 +1,108 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0; url=zlang-ide.html">
-  <title>ZDOS · GENESIS PORTAL</title>
-  <style>
-    body { background:#000; color:#0f0; font-family:monospace; padding:40px; }
-  </style>
+<meta charset="UTF-8">
+<title>GENESIS — ZDOS Kernel Entry</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body {
+    margin:0;
+    background:#000;
+    color:#2bffb3;
+    font-family:ui-monospace, monospace;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    height:100vh;
+    overflow:hidden;
+  }
+
+  #boot {
+    font-size:13px;
+    line-height:1.4;
+    white-space:pre;
+    text-align:left;
+    width:90%;
+    max-width:600px;
+    height:260px;
+    overflow:auto;
+    border:1px solid #0f0;
+    padding:14px;
+    background:#020202;
+    box-shadow:0 0 12px #0f0;
+  }
+
+  #title {
+    margin-top:20px;
+    font-size:22px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:#7df9ff;
+  }
+
+  .btn {
+    margin-top:20px;
+    padding:10px 20px;
+    border:1px solid #2bffb3;
+    border-radius:4px;
+    color:#2bffb3;
+    text-decoration:none;
+    font-size:13px;
+    transition:0.2s;
+  }
+  .btn:hover {
+    background:#2bffb3;
+    color:#000;
+  }
+
+  footer {
+    position:absolute;
+    bottom:20px;
+    font-size:11px;
+    color:#0f0;
+    opacity:0.6;
+  }
+</style>
 </head>
+
 <body>
-  ZDOS · GENESIS PORTAL<br>
-  Reindirizzamento a Z‑LANG IDE PRO…
+
+<div id="boot"></div>
+
+<div id="title">GENESIS KERNEL • ZDOS V5</div>
+
+<a class="btn" href="zlang-ide.html">ENTER ZDOS IDE</a>
+
+<footer>GENESIS • Quantum Bootloader</footer>
+
+<script>
+const lines = [
+  "[GENESIS] Initializing quantum substrate...",
+  "[GENESIS] Loading meta-kernel...",
+  "[GENESIS] Parsing genesis-meta.json...",
+  "[GENESIS] Mapping modules...",
+  "[GENESIS] Bootflow sequence detected:",
+  "          INIT → META → MAP → FLOW → CORE → FS → VM → LANG → LINK → READY",
+  "[GENESIS] Activating Z-LANG compiler...",
+  "[GENESIS] Activating Z-VM stack machine...",
+  "[GENESIS] Linking runtime...",
+  "[GENESIS] Establishing kernel space...",
+  "[GENESIS] System online."
+];
+
+let i = 0;
+function boot() {
+  const el = document.getElementById("boot");
+  if (i < lines.length) {
+    el.textContent += lines[i] + "\n";
+    el.scrollTop = el.scrollHeight;
+    i++;
+    setTimeout(boot, 120);
+  }
+}
+boot();
+</script>
+
 </body>
 </html>
