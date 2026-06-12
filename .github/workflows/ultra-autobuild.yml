@@ -19,6 +19,8 @@ jobs:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       # ---------------------------------------------------------
@@ -255,6 +257,8 @@ jobs:
   deploy:
     needs: autobuild
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     env:
