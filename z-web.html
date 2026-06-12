@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ZDOS DASHBOARD V5</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin:0; font-family:system-ui, sans-serif; background:#05060a; color:#f5f5f5; }
+    header { padding:16px 24px; border-bottom:1px solid #222; display:flex; justify-content:space-between; align-items:center; }
+    .logo { font-weight:700; letter-spacing:0.08em; font-size:14px; text-transform:uppercase; color:#7df9ff; }
+    .tag { font-size:11px; padding:3px 8px; border-radius:999px; border:1px solid #333; color:#aaa; }
+    main { padding:20px; max-width:1100px; margin:0 auto; }
+    h1 { font-size:22px; margin-bottom:4px; }
+    .subtitle { color:#aaa; font-size:13px; margin-bottom:20px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
+    .card { background:#0b0d14; border:1px solid #181b24; border-radius:10px; padding:14px 16px; box-shadow:0 0 0 1px #05060a; }
+    .card h2 { font-size:15px; margin:0 0 6px; }
+    .card p { font-size:12px; color:#aaa; margin:0 0 10px; }
+    .btn { display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:6px 10px; border-radius:999px; border:1px solid #2bffb3; color:#2bffb3; text-decoration:none; background:transparent; cursor:pointer; }
+    .btn.secondary { border-color:#444; color:#bbb; }
+    .pill { font-size:11px; padding:2px 7px; border-radius:999px; background:#111827; color:#9ca3af; display:inline-block; margin-right:4px; }
+    #genesis-map { font-size:11px; line-height:1.5; max-height:180px; overflow:auto; margin-top:6px; }
+    .mono { font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">ZDOS V5</div>
+    <div class="tag">GENESIS KERNEL • QUANTUM MODE</div>
+  </header>
+  <main>
+    <h1>ZDOS DASHBOARD</h1>
+    <div class="subtitle">Hub centrale per IDE, GENESIS, Z‑LANG, Z‑VM e moduli kernel.</div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>ZDOS IDE</h2>
+        <p>Editor, terminale ZDOS, Z‑LANG, Z‑VM, FS virtuale, GENESIS V5 loader.</p>
+        <a class="btn" href="zlang-ide.html">Apri IDE</a>
+      </div>
+
+      <div class="card">
+        <h2>GENESIS MAP</h2>
+        <p>Visualizzazione dei moduli kernel da <span class="mono">api/genesis-meta.json</span>.</p>
+        <span class="pill">kernel</span><span class="pill">bootflow</span>
+        <div id="genesis-map">Loading GENESIS meta…</div>
+      </div>
+
+      <div class="card">
+        <h2>GENESIS BOOTFLOW</h2>
+        <p>Simulazione della sequenza di boot GENESIS V5.</p>
+        <button class="btn secondary" onclick="genesisBootPreview()">Mostra bootflow</button>
+        <pre id="boot-log" class="mono" style="font-size:11px; margin-top:8px; max-height:150px; overflow:auto;"></pre>
+      </div>
+
+      <div class="card">
+        <h2>Terminale ZDOS</h2>
+        <p>Accesso rapido al terminale integrato dell’IDE.</p>
+        <a class="btn secondary" href="zlang-ide.html#terminal">Apri terminale</a>
+      </div>
+    </div>
+  </main>
+
+  <script src="genesis-v5.js"></script>
+  <script>
+    // fallback log locale
+    function dashLog(msg) {
+      const el = document.getElementById("boot-log");
+      if (!el) return;
+      el.textContent += msg + "\\n";
+      el.scrollTop = el.scrollHeight;
+    }
+
+    async function loadGenesisMap() {
+      try {
+        const meta = await fetch("api/genesis-meta.json").then(r => r.json());
+        window.GENESIS = meta;
+        const mapEl = document.getElementById("genesis-map");
+        mapEl.innerHTML = meta.modules
+          .map(m => \`• \${m.name} (\${m.type}) — \${m.path}\`)
+          .join("<br>");
+      } catch (e) {
+        document.getElementById("genesis-map").textContent = "Errore nel caricamento di GENESIS meta.";
+      }
+    }
+
+    async function genesisBootPreview() {
+      if (!window.GENESIS) {
+        try {
+          const meta = await fetch("api/genesis-meta.json").then(r => r.json());
+          window.GENESIS = meta;
+        } catch (e) {
+          dashLog("[ERR] Impossibile caricare GENESIS meta.");
+          return;
+        }
+      }
+      const flow = window.GENESIS.bootflow || [];
+      const logEl = document.getElementById("boot-log");
+      logEl.textContent = "";
+      dashLog("[GENESIS] V5 BOOTFLOW PREVIEW");
+      for (let step of flow) {
+        await new Promise(r => setTimeout(r, 120));
+        dashLog("[BOOT] " + step);
+      }
+      dashLog("[GENESIS] PREVIEW COMPLETATA.");
+    }
+
+    // opzionale: avvia anche il vero boot V5 se definito
+    if (typeof GENESIS_V5_BOOT === "function") {
+      GENESIS_V5_BOOT();
+    }
+    loadGenesisMap();
+  </script>
+</body>
+</html>
