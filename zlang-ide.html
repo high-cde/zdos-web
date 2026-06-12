@@ -1,523 +1,200 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
- <meta charset="UTF-8" />
- <title>ZDOS · IDE Z‑LANG PRO</title>
- <meta name="viewport" content="width=device-width, initial-scale=1" />
-
- <style>
- :root {
- --bg: #050608;
- --fg: #e5f5ff;
- --accent: #00ff9c;
- --accent-soft: rgba(0,255,156,0.12);
- --muted: #7f8b9e;
- --mono: "Fira Code", "JetBrains Mono", monospace;
- --sans: system-ui, -apple-system, sans-serif;
- }
-
- body {
- margin: 0;
- background: radial-gradient(circle at top, #151b2a 0, #050608 55%);
- color: var(--fg);
- font-family: var(--sans);
- padding: 20px;
- }
-
- h1 { margin-bottom: 6px; }
-
- .layout {
- display: grid;
- grid-template-columns: 1.6fr 1fr;
- gap: 16px;
- }
-
- @media (max-width: 900px) {
- .layout { grid-template-columns: 1fr; }
- }
-
- .panel {
- background: rgba(0,0,0,0.6);
- border: 1px solid rgba(255,255,255,0.08);
- border-radius: 12px;
- padding: 12px;
- }
-
- .panel-title {
- font-size: 12px;
- color: var(--muted);
- letter-spacing: 0.12em;
- text-transform: uppercase;
- margin-bottom: 6px;
- }
-
- .editor-wrap {
- position: relative;
- border-radius: 10px;
- overflow: hidden;
- border: 1px solid rgba(255,255,255,0.12);
- background: #05070b;
- }
-
- .editor-highlight,
- .editor-input {
- font-family: var(--mono);
- font-size: 13px;
- line-height: 1.4;
- padding: 10px;
- white-space: pre;
- overflow: auto;
- tab-size: 2;
- }
-
- .editor-highlight {
- position: absolute;
- inset: 0;
- color: transparent;
- pointer-events: none;
- }
-
- .editor-highlight span.kw { color: #00ff9c; }
- .editor-highlight span.op { color: #4fd1ff; }
- .editor-highlight span.str { color: #ffcc66; }
- .editor-highlight span.com { color: #555f7a; }
-
- .editor-input {
- position: relative;
- background: transparent;
- color: var(--fg);
- border: none;
- outline: none;
- resize: none;
- min-height: 260px;
- }
-
- button {
- border-radius: 999px;
- border: 1px solid var(--accent);
- background: var(--accent-soft);
- color: var(--accent);
- padding: 6px 14px;
- font-size: 12px;
- cursor: pointer;
- margin-right: 6px;
- }
-
- .output, .state-box {
- font-family: var(--mono);
- font-size: 12px;
- background: #05070b;
- border-radius: 8px;
- border: 1px solid rgba(255,255,255,0.12);
- padding: 10px;
- min-height: 120px;
- white-space: pre-wrap;
- overflow-y: auto;
- }
-
- .micro-grid {
- display: grid;
- grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
- gap: 8px;
- margin-top: 10px;
- }
-
- .micro-card {
- background: rgba(0,0,0,0.6);
- border-radius: 8px;
- border: 1px solid rgba(255,255,255,0.08);
- padding: 8px;
- font-size: 11px;
- }
-
- footer {
- margin-top: 20px;
- padding-top: 10px;
- border-top: 1px solid rgba(255,255,255,0.08);
- font-size: 12px;
- color: var(--muted);
- }
- </style>
+<meta charset="UTF-8">
+<title>Z‑LANG IDE PRO</title>
+<style>
+  body { background:#000; color:#0f0; font-family:monospace; margin:0; padding:0; }
+  #container { display:flex; height:100vh; }
+  #editor { width:50%; padding:10px; background:#111; color:#0f0; font-size:14px; outline:none; border:none; }
+  #right { width:50%; display:flex; flex-direction:column; }
+  #output { flex:1; background:#000; padding:10px; overflow:auto; border-left:2px solid #0f0; }
+  #buttons { padding:10px; background:#111; border-left:2px solid #0f0; }
+  button { background:#000; color:#0f0; border:1px solid #0f0; padding:5px 10px; margin-right:5px; cursor:pointer; }
+  button:hover { background:#0f0; color:#000; }
+  #term-input { width:100%; background:#000; color:#0f0; border:1px solid #0f0; padding:5px; font-family:monospace; }
+  .op { color:#0ff; }
+</style>
 </head>
 
 <body>
- <h1>IDE Z‑LANG · PRO</h1>
- <p class="muted">Editor con evidenziazione, mini‑VM, micro‑ops, funzioni custom, Z‑FS e bytecode.</p>
+<div id="container">
+  <textarea id="editor"># Esempio Z-LANG
+push 5
+push 7
+add
+halt</textarea>
 
- <div class="layout">
+  <div id="right">
+    <div id="buttons">
+      <button onclick="runProgram()">Run VM</button>
+      <button onclick="stepProgram()">Step</button>
+      <button onclick="runZLang()">Run Z‑LANG</button>
+      <button onclick="runZVM()">Run Z‑VM</button>
+      <button onclick="compileAndRunZVM()">Compile & Run Z‑VM</button>
+    </div>
 
- <!-- EDITOR -->
- <section class="panel">
- <div class="panel-title">Editor Z‑LANG</div>
+    <div id="output"></div>
 
- <div class="editor-wrap">
- <pre id="hl" class="editor-highlight"></pre>
- <textarea id="editor" class="editor-input" spellcheck="false"></textarea>
- </div>
-
- <div style="margin-top:10px;">
- <button onclick="runProgram()">Esegui</button>
- <button onclick="stepProgram()">Step</button>
- <button onclick="resetVM()">Reset VM</button>
- <button onclick="clearOutput()">Pulisci Output</button>
- </div>
- </section>
-
- <!-- OUTPUT + VM STATE + MICRO OPS -->
- <section class="panel">
- <div class="panel-title">Output</div>
- <div id="output" class="output"># Output Z‑LANG…</div>
-
- <div class="panel-title" style="margin-top:10px;">Stato VM</div>
- <div id="vm-state" class="state-box"></div>
-
- <div class="panel-title" style="margin-top:10px;">Micro‑Operazioni</div>
- <div class="micro-grid">
- <div class="micro-card">
- <strong>ping()</strong>
- <button onclick="runMicro('ping')">Esegui</button>
- </div>
- <div class="micro-card">
- <strong>wallet.balance()</strong>
- <button onclick="runMicro('wallet.balance')">Esegui</button>
- </div>
- <div class="micro-card">
- <strong>system.info()</strong>
- <button onclick="runMicro('system.info')">Esegui</button>
- </div>
- </div>
- </section>
-
- </div>
-
- <footer>
- Questo IDE esegue Z‑LANG in locale, in una mini‑VM JS. 
- Il codice viene salvato automaticamente in <code>localStorage</code>.
- </footer>
+    <input id="term-input" placeholder="ZDOS> comando" onkeydown="if(event.key==='Enter') handleTermCommand(this.value)">
+  </div>
+</div>
 
 <script>
-/* ============================
- MINI VM Z-LANG PRO
- ============================ */
-
-const VM = {
- ip: 0,
- vars: {},
- lastResult: null,
- running: false,
- program: [],
- fs: {}, // filesystem virtuale
- functions: {}, // funzioni custom
-};
-
 const editorEl = document.getElementById("editor");
-const hlEl = document.getElementById("hl");
 const outEl = document.getElementById("output");
-const vmStateEl = document.getElementById("vm-state");
-
-const LS_KEY = "zdos_zlang_ide";
-
-/* ============================
- FUNZIONI CUSTOM
- ============================ */
-
-function registerBuiltins() {
- VM.functions["square"] = (args) => Number(args[0]) ** 2;
- VM.functions["inc"] = (args) => Number(args[0]) + 1;
-}
-
-/* ============================
- INIT
- ============================ */
-
-function loadInitialCode() {
- registerBuiltins();
- const saved = localStorage.getItem(LS_KEY);
- editorEl.value = saved || `# Z-LANG demo PRO
-op log "Hello from Z-LANG PRO"
-op set x 10
-op add x 5
-op call square 4
-op fs.write "/tmp/test.txt" "ciao"
-op fs.read "/tmp/test.txt"
-op system.info
-`;
- highlight();
- updateVMState();
-}
-
-function saveCode() {
- localStorage.setItem(LS_KEY, editorEl.value);
-}
-
-/* ============================
- HIGHLIGHTING
- ============================ */
-
-function highlight() {
- const text = editorEl.value;
- const lines = text.split("\n");
- const out = [];
-
- for (let line of lines) {
- let html = line
- .replace(/&/g, "&amp;")
- .replace(/</g, "&lt;")
- .replace(/>/g, "&gt;");
-
- if (html.trim().startsWith("#")) {
- out.push(`<span class="com">${html}</span>`);
- continue;
- }
-
- html = html.replace(/\b(op)\b/g, '<span class="kw">$1</span>');
- html = html.replace(/\b(log|add|set|get|call|fs\.write|fs\.read|wallet\.balance|system\.info)\b/g, '<span class="op">$1</span>');
- html = html.replace(/"([^"]*)"/g, '<span class="str">"$1"</span>');
-
- out.push(html);
- }
-
- hlEl.innerHTML = out.join("\n");
-}
-
-/* ============================
- PARSER
- ============================ */
-
-function parseProgram() {
- const lines = editorEl.value.split("\n");
- const program = [];
-
- for (let raw of lines) {
- const line = raw.trim();
- if (!line || line.startsWith("#")) continue;
- const parts = line.split(/\s+/);
- if (parts[0] !== "op") continue;
- const op = parts[1];
- const args = parts.slice(2);
- program.push({ raw, op, args });
- }
-
- VM.program = program;
- VM.ip = 0;
-}
-
-/* ============================
- BYTECODE
- ============================ */
-
-function compileToBytecode() {
- return VM.program.map((instr, idx) => ({
- i: idx,
- op: instr.op,
- args: instr.args,
- }));
-}
-
-/* ============================
- EXECUTION
- ============================ */
 
 function log(msg) {
- outEl.textContent += msg + "\n";
+  outEl.innerHTML += msg + "<br>";
+  outEl.scrollTop = outEl.scrollHeight;
 }
 
-function evalArg(token) {
- if (token in VM.vars) return VM.vars[token];
- const n = Number(token);
- if (!Number.isNaN(n)) return n;
- return token;
+function highlight(code) {
+  code = code.replace(/\brun\.zlang\b/g, '<span class="op">run.zlang</span>');
+  return code;
 }
 
-function step() {
- if (VM.ip < 0 || VM.ip >= VM.program.length) {
- VM.running = false;
- return false;
- }
+/* ============================================================
+   MINI‑VM ORIGINALE (per compatibilità)
+   ============================================================ */
+const VM = {
+  pc: 0,
+  program: [],
+  vars: {},
+  fs: {},
+  lastResult: null
+};
 
- const instr = VM.program[VM.ip];
- const { op, args } = instr;
-
- log("[dbg] ip=" + VM.ip + " op=" + op + " args=" + JSON.stringify(args));
-
- switch (op) {
- case "log": {
- const msg = instr.raw.match(/"([^"]*)"/)?.[1] || args.join(" ");
- log("[log] " + msg);
- VM.lastResult = msg;
- break;
- }
-
- case "set": {
- const name = args[0];
- const value = evalArg(args[1]);
- VM.vars[name] = value;
- log("[set] " + name + " = " + value);
- VM.lastResult = value;
- break;
- }
-
- case "get": {
- const name = args[0];
- const value = VM.vars[name];
- log("[get] " + name + " = " + value);
- VM.lastResult = value;
- break;
- }
-
- case "add": {
- const a = evalArg(args[0]);
- const b = evalArg(args[1]);
- const res = Number(a) + Number(b);
- log("[add] " + a + " + " + b + " = " + res);
- VM.lastResult = res;
- break;
- }
-
- case "call": {
- const fname = args[0];
- const fargs = args.slice(1).map(evalArg);
- const fn = VM.functions[fname];
- if (!fn) {
- log("[call] funzione sconosciuta: " + fname);
- } else {
- const res = fn(fargs, VM);
- log("[call] " + fname + "(" + fargs.join(", ") + ") = " + res);
- VM.lastResult = res;
- }
- break;
- }
-
- case "fs.write": {
- const path = args[0];
- const content = instr.raw.match(/"([^"]*)"/)?.[1] || "";
- VM.fs[path] = content;
- log("[fs.write] " + path + " = \"" + content + "\"");
- VM.lastResult = content;
- break;
- }
-
- case "fs.read": {
- const path = args[0];
- const content = VM.fs[path] ?? null;
- log("[fs.read] " + path + " → " + JSON.stringify(content));
- VM.lastResult = content;
- break;
- }
-
- case "wallet.balance": {
- const fake = 1337.42;
- log("[wallet] Saldo HIGHCOIN: " + fake + " HC");
- VM.lastResult = fake;
- break;
- }
-
- case "system.info": {
- const info = {
- vm: "Z-LANG MiniVM",
- vars: Object.keys(VM.vars).length,
- time: new Date().toISOString(),
- };
- log("[system] " + JSON.stringify(info));
- VM.lastResult = info;
- break;
- }
-
- default:
- log("[errore] Operazione sconosciuta: " + op);
- }
-
- VM.ip++;
- return true;
-}
-
-/* ============================
- IDE ACTIONS
- ============================ */
-
-function runProgram() {
- outEl.textContent = "";
- parseProgram();
- VM.running = true;
-
- while (VM.running && VM.ip < VM.program.length) {
- step();
- }
-
- updateVMState();
+function parseProgram() {
+  VM.program = [];
+  const lines = editorEl.value.split("\n");
+  for (let line of lines) {
+    line = line.trim();
+    if (!line) continue;
+    const parts = line.split(" ");
+    VM.program.push({ op: parts[0], raw: line });
+  }
 }
 
 function stepProgram() {
- if (!VM.program.length) parseProgram();
- VM.running = true;
- const ok = step();
- if (!ok) VM.running = false;
- updateVMState();
+  if (VM.pc >= VM.program.length) {
+    log("[VM] Fine programma.");
+    return;
+  }
+
+  const instr = VM.program[VM.pc++];
+  switch(instr.op) {
+
+    case "run.zlang": {
+      const code = instr.raw.replace("run.zlang ", "");
+      log("[run.zlang] >>> " + code);
+      VM.lastResult = "OK";
+      break;
+    }
+
+    default:
+      log("[VM] Istruzione sconosciuta: " + instr.op);
+  }
 }
 
-function resetVM() {
- VM.ip = 0;
- VM.vars = {};
- VM.fs = {};
- VM.lastResult = null;
- VM.running = false;
- updateVMState();
+function runProgram() {
+  outEl.innerHTML = "";
+  VM.pc = 0;
+  parseProgram();
+  while (VM.pc < VM.program.length) stepProgram();
 }
 
-function clearOutput() {
- outEl.textContent = "";
+/* ============================================================
+   Z‑VM STACK MACHINE
+   ============================================================ */
+const ZVM = {
+  pc: 0,
+  stack: [],
+  heap: {},
+  regs: { r0:0, r1:0, r2:0, r3:0 },
+  bytecode: [],
+  halted: false
+};
+
+function zvmStep() {
+  if (ZVM.halted || ZVM.pc >= ZVM.bytecode.length) return;
+
+  const op = ZVM.bytecode[ZVM.pc++];
+
+  switch(op) {
+    case 0x01: ZVM.stack.push(ZVM.bytecode[ZVM.pc++]); break;
+    case 0x02: ZVM.stack.pop(); break;
+    case 0x03: { const b=ZVM.stack.pop(), a=ZVM.stack.pop(); ZVM.stack.push(a+b); break; }
+    case 0x04: { const b=ZVM.stack.pop(), a=ZVM.stack.pop(); ZVM.stack.push(a-b); break; }
+    case 0x05: { const b=ZVM.stack.pop(), a=ZVM.stack.pop(); ZVM.stack.push(a*b); break; }
+    case 0x06: { const b=ZVM.stack.pop(), a=ZVM.stack.pop(); ZVM.stack.push(a/b); break; }
+    case 0x07: { const r="r"+ZVM.bytecode[ZVM.pc++]; ZVM.stack.push(ZVM.regs[r]); break; }
+    case 0x08: { const r="r"+ZVM.bytecode[ZVM.pc++]; ZVM.regs[r]=ZVM.stack.pop(); break; }
+    case 0x09: ZVM.halted = true; break;
+  }
 }
 
-/* ============================
- MICRO OPS
- ============================ */
+function runZVM() {
+  outEl.innerHTML = "";
+  log("[ZVM] Avvio stack machine…");
 
-function runMicro(op) {
- switch (op) {
- case "ping":
- log("[micro] ping() → pong");
- break;
- case "wallet.balance":
- log("[micro] wallet.balance() → 1337.42 HC");
- break;
- case "system.info":
- log("[micro] system.info() → " + navigator.userAgent);
- break;
- }
- updateVMState();
+  ZVM.pc = 0;
+  ZVM.stack = [];
+  ZVM.regs = { r0:0, r1:0, r2:0, r3:0 };
+  ZVM.halted = false;
+
+  while (!ZVM.halted && ZVM.pc < ZVM.bytecode.length) {
+    zvmStep();
+  }
+
+  log("[ZVM] Completato. Stack: " + JSON.stringify(ZVM.stack));
 }
 
-/* ============================
- VM STATE VIEW
- ============================ */
+/* ============================================================
+   COMPILATORE Z‑LANG → Z‑VM
+   ============================================================ */
+function compileZLangToZVM(code) {
+  const lines = code.split("\n");
+  const bc = [];
 
-function updateVMState() {
- vmStateEl.textContent = JSON.stringify({
- ip: VM.ip,
- vars: VM.vars,
- fs: VM.fs,
- lastResult: VM.lastResult,
- running: VM.running,
- bytecode: compileToBytecode(),
- }, null, 2);
+  for (let line of lines) {
+    line = line.trim();
+    if (!line || line.startsWith("#")) continue;
+
+    if (line.startsWith("push ")) {
+      bc.push(0x01, Number(line.split(" ")[1]));
+    } else if (line === "add") bc.push(0x03);
+    else if (line === "sub") bc.push(0x04);
+    else if (line === "mul") bc.push(0x05);
+    else if (line === "div") bc.push(0x06);
+    else if (line === "halt") bc.push(0x09);
+  }
+
+  return bc;
 }
 
-/* ============================
- EVENTS
- ============================ */
+function compileAndRunZVM() {
+  outEl.innerHTML = "";
+  log("[ZVM] Compilazione…");
+  ZVM.bytecode = compileZLangToZVM(editorEl.value);
+  log("[ZVM] Bytecode: " + JSON.stringify(ZVM.bytecode));
+  runZVM();
+}
 
-editorEl.addEventListener("input", () => {
- highlight();
- saveCode();
-});
+/* ============================================================
+   TERMINALE ZDOS
+   ============================================================ */
+function handleTermCommand(cmd) {
+  cmd = cmd.trim();
+  if (!cmd) return;
+  log("ZDOS> " + cmd);
 
-editorEl.addEventListener("scroll", () => {
- hlEl.scrollTop = editorEl.scrollTop;
- hlEl.scrollLeft = editorEl.scrollLeft;
-});
-
-/* INIT */
-loadInitialCode();
+  if (cmd === "run zvm") runZVM();
+  else if (cmd === "compile zvm") compileAndRunZVM();
+  else if (cmd === "vars") log("[vars] " + JSON.stringify(VM.vars));
+  else if (cmd === "fs") log("[fs] " + JSON.stringify(VM.fs));
+  else log("[errore] Comando sconosciuto.");
+}
 </script>
 </body>
 </html>
